@@ -59,14 +59,55 @@ SELECT
     SUM(sales_amount) OVER (PARTITION BY emp_id) AS percent_contribution
 FROM employee_sales;
 
+-- 11. Find the top 2 sales records from each department.
+SELECT
+	*
+FROM
+	(
+		SELECT
+			*,
+			ROW_NUMBER() OVER (
+				PARTITION BY
+					DEPARTMENT
+				ORDER BY
+					SALES_AMOUNT DESC
+			) AS RNK
+		FROM
+			EMPLOYEE_SALES
+	) T
+WHERE
+	RNK <= 2;
 
+-- 12. Find employees whose sale is greater than department average.
+select * from (select * , avg(sales_amount) over(partition by department ) as dept_avg from employee_sales
+)t where sales_amount > dept_avg;
+-- 13. Find cumulative sales percentage within each department.
+SELECT
+	EMP_NAME,
+	DEPARTMENT,
+	SALES_AMOUNT,
+	100.0 * SUM(SALES_AMOUNT) OVER (
+		PARTITION BY
+			DEPARTMENT
+		ORDER BY
+			SALES_AMOUNT
+	) / SUM(SALES_AMOUNT) OVER (
+		PARTITION BY
+			DEPARTMENT
+	) AS CUMU_PERSENTAGE
+FROM
+	EMPLOYEE_SALES;
 
-
-
-
-
-
-
-
-
+-- 14. Find the second highest sale in each department.
+SELECT
+	EMP_NAME,
+	DEPARTMENT,
+	DENSE_RANK(SALES_AMOUNT) OVER (
+		PARTITION BY
+			DEPARTMENT ORDER
+	) AS RANKING
+FROM
+	EMPLOYEE_SALES
+WHERE
+	RANKING = 2;
 
